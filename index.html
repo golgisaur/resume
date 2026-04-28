@@ -406,6 +406,7 @@
 
   /* === Stats strip === */
   .stats {
+    position: relative;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     border-top: 1px solid var(--ink-12);
@@ -414,6 +415,15 @@
     margin-top: 16px;
     opacity: 0;
     animation: fadeIn 0.8s ease-out 1s forwards;
+  }
+  .orbit-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: visible;
+    z-index: 0;
   }
   .stat {
     padding: 0 28px;
@@ -652,6 +662,14 @@
 
   <!-- Stats strip -->
   <section class="stats">
+    <!-- Orbit plane that weaves through the strip via a sine wave. -->
+    <svg class="orbit-svg" aria-hidden="true">
+      <path id="orbitPath" fill="none" stroke="none"/>
+      <g class="trail-particles"></g>
+      <g id="orbitPlane" fill="#D85A3A" opacity="0.9" style="filter:drop-shadow(0 0 3px rgba(216,90,58,0.6))" display="none">
+        <path d="M 5 0 L -1 1 L -1 3 L -2 3 L -2 1 L -4 1 L -4 2 L -5 2 L -5 -2 L -4 -2 L -4 -1 L -2 -1 L -2 -3 L -1 -3 L -1 -1 Z"/>
+      </g>
+    </svg>
     <div class="stat">
       <div class="stat-label">
         <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -969,6 +987,147 @@
 
     render();
     spin();
+  })();
+</script>
+
+<script>
+  // === Stats-strip orbit plane ===
+  (function () {
+    const section = document.querySelector('.stats');
+    const svg = document.querySelector('.orbit-svg');
+    const pathEl = document.getElementById('orbitPath');
+    const planeEl = document.getElementById('orbitPlane');
+    if (!section || !svg || !pathEl || !planeEl) return;
+
+    const SEGMENTS = 240;
+    const PERIODS = 2;          // 4 stats × half-period each
+    const AMPLITUDE_PCT = 0.34; // % of section height
+    const TURN_OFFSET = 13;     // vertical gap between forward & reverse lanes (bigger = more circular U-turn)
+    const TURN_REACH = 92;      // how far the U-turn bulges off-canvas (Bezier control distance)
+
+    function buildWave(w, h) {
+      const cy = h / 2;
+      const amp = h * AMPLITUDE_PCT;
+      const slope = amp * 2 * Math.PI * PERIODS / w; // wave's tangent slope at x=0 and x=W
+      const k = TURN_REACH;
+      const off = TURN_OFFSET;
+      const cy_top = cy - off;   // forward lane (going right)
+      const cy_bot = cy + off;   // reverse lane (going left)
+
+      // Forward wave: left → right at cy_top
+      let d = `M 0 ${cy_top.toFixed(2)}`;
+      for (let i = 1; i <= SEGMENTS; i++) {
+        const t = i / SEGMENTS;
+        const x = (t * w).toFixed(2);
+        const y = (cy_top + amp * Math.sin(2 * Math.PI * PERIODS * t)).toFixed(2);
+        d += ` L ${x} ${y}`;
+      }
+
+      // Right U-turn: smooth cubic Bezier from (W, cy_top) → (W, cy_bot).
+      // Control points share x = W+k so the loop bulges off-canvas to the right;
+      // y values keep the entry/exit tangents matching the wave's slope on either side.
+      d += ` C ${(w + k).toFixed(2)} ${(cy_top + k * slope).toFixed(2)}`
+         + ` ${(w + k).toFixed(2)} ${(cy_bot + k * slope).toFixed(2)}`
+         + ` ${w.toFixed(2)} ${cy_bot.toFixed(2)}`;
+
+      // Reverse wave: right → left at cy_bot (traversed by stepping i down)
+      for (let i = SEGMENTS - 1; i >= 0; i--) {
+        const t = i / SEGMENTS;
+        const x = (t * w).toFixed(2);
+        const y = (cy_bot + amp * Math.sin(2 * Math.PI * PERIODS * t)).toFixed(2);
+        d += ` L ${x} ${y}`;
+      }
+
+      // Left U-turn: cubic Bezier from (0, cy_bot) → (0, cy_top), bulging off-canvas to the left.
+      d += ` C ${(-k).toFixed(2)} ${(cy_bot - k * slope).toFixed(2)}`
+         + ` ${(-k).toFixed(2)} ${(cy_top - k * slope).toFixed(2)}`
+         + ` 0 ${cy_top.toFixed(2)}`;
+
+      return d + ' Z';
+    }
+
+    function updatePath() {
+      const rect = section.getBoundingClientRect();
+      const w = rect.width;
+      const h = rect.height;
+      if (w <= 0 || h <= 0) return;
+      svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+      pathEl.setAttribute('d', buildWave(w, h));
+    }
+
+    if ('ResizeObserver' in window) {
+      new ResizeObserver(updatePath).observe(section);
+    } else {
+      window.addEventListener('resize', updatePath);
+    }
+    updatePath();
+
+    // One-way continuous closed loop with U-turns at each end.
+    const TOTAL_SECONDS = 96;
+    const speed = 1 / (TOTAL_SECONDS * 60);
+    const scale = 1.1;
+    let t = 0;
+
+    // === Comet tail: pool of fading particles dropped behind the plane ===
+    const TRAIL_POOL = 50;
+    const TRAIL_LIFETIME = 1700;  // ms — particle fade duration
+    const TRAIL_INTERVAL = 65;    // ms between particle drops (sparser)
+    const trailG = svg.querySelector('.trail-particles');
+    const SVG_NS = 'http://www.w3.org/2000/svg';
+    const particles = [];
+    for (let i = 0; i < TRAIL_POOL; i++) {
+      const c = document.createElementNS(SVG_NS, 'circle');
+      c.setAttribute('r', '1.6');
+      c.setAttribute('fill', '#D85A3A');
+      c.setAttribute('opacity', '0');
+      c.style.filter = 'drop-shadow(0 0 1.5px rgba(216,90,58,0.45))';
+      trailG.appendChild(c);
+      particles.push({ el: c, born: -Infinity });
+    }
+    let trailHead = 0;
+    let lastTrailDrop = 0;
+
+    function tick() {
+      t = (t + speed) % 1;
+      const now = performance.now();
+      try {
+        const len = pathEl.getTotalLength();
+        if (len > 0) {
+          const tDist = t * len;
+          const pt = pathEl.getPointAtLength(tDist);
+          const ahead = pathEl.getPointAtLength(Math.min(tDist + 1, len));
+          const angle = Math.atan2(ahead.y - pt.y, ahead.x - pt.x) * 180 / Math.PI;
+
+          // Drop a new trail particle at the plane's position
+          if (now - lastTrailDrop >= TRAIL_INTERVAL) {
+            const p = particles[trailHead];
+            p.el.setAttribute('cx', pt.x.toFixed(2));
+            p.el.setAttribute('cy', pt.y.toFixed(2));
+            p.born = now;
+            trailHead = (trailHead + 1) % TRAIL_POOL;
+            lastTrailDrop = now;
+          }
+
+          planeEl.setAttribute('transform', `translate(${pt.x},${pt.y}) rotate(${angle}) scale(${scale})`);
+          planeEl.setAttribute('display', null);
+        }
+      } catch (e) {}
+
+      // Fade all particles based on age
+      for (const p of particles) {
+        const age = now - p.born;
+        if (age > TRAIL_LIFETIME || age < 0) {
+          p.el.setAttribute('opacity', '0');
+        } else {
+          const fade = 1 - age / TRAIL_LIFETIME;
+          // Quadratic easing — fades faster near the end for a more comet-like falloff
+          p.el.setAttribute('opacity', (fade * fade * 0.32).toFixed(3));
+        }
+      }
+
+      requestAnimationFrame(tick);
+    }
+    tick();
   })();
 </script>
 
