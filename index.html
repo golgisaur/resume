@@ -1,1439 +1,962 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MZ</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%230d0d0d'/><text x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-family='serif' font-size='14' font-weight='700' fill='white'>MZ</text></svg>">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700;1,800&family=Outfit:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    :root {
-      --bg: #e2e2e8;
-      --bg-card: rgba(255, 255, 255, 0.72);
-      --bg-glass: rgba(255, 255, 255, 0.6);
-      --bg-ghost: rgba(0, 0, 0, 0.06);
-      --border: rgba(255, 255, 255, 0.85);
-      --border-subtle: rgba(0, 0, 0, 0.07);
-      --shadow-glass: 0 4px 24px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.95);
-      --text: #1d1d1f;
-      --muted: #6e6e73;
-      --serif: 'Playfair Display', Georgia, serif;
-      --sans: 'Outfit', system-ui, sans-serif;
-      --ink: #1d1d1f;
-      --paper: #ffffff;
-    }
-
-    html {
-      scroll-behavior: smooth;
-      scrollbar-width: thin;
-      scrollbar-color: rgba(0,0,0,0.18) transparent;
-    }
-
-    body {
-      font-family: var(--sans);
-      background-color: var(--bg);
-      background-image:
-        linear-gradient(rgba(0,0,0,0.055) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,0,0,0.055) 1px, transparent 1px),
-        radial-gradient(ellipse 70% 50% at 20% 20%, rgba(175, 188, 235, 0.35) 0%, transparent 65%),
-        radial-gradient(ellipse 60% 50% at 82% 80%, rgba(205, 182, 235, 0.25) 0%, transparent 65%);
-      background-size: 80px 80px, 80px 80px, 100% 100%, 100% 100%;
-      background-attachment: fixed;
-      color: var(--text);
-      line-height: 1.7;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      overflow-x: hidden;
-      cursor: default;
-    }
-
-    ::selection {
-      background: var(--ink);
-      color: var(--paper);
-    }
-
-    /* ---- REVEAL ANIMATIONS ---- */
-    .reveal {
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-                  transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .reveal.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .reveal-left {
-      opacity: 0;
-      transform: translateX(-30px);
-      transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-                  transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .reveal-left.visible {
-      opacity: 1;
-      transform: translateX(0);
-    }
-
-    .reveal-right {
-      opacity: 0;
-      transform: translateX(60px);
-      transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
-                  transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .reveal-right.visible {
-      opacity: 1;
-      transform: translateX(0);
-    }
-
-    .stagger-1 { transition-delay: 0.05s; }
-    .stagger-2 { transition-delay: 0.12s; }
-    .stagger-3 { transition-delay: 0.2s; }
-    .stagger-4 { transition-delay: 0.28s; }
-    .stagger-5 { transition-delay: 0.36s; }
-    .stagger-6 { transition-delay: 0.44s; }
-
-    /* ---- NAV ---- */
-    nav {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-      padding: 0 48px;
-      height: 72px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: rgba(248, 248, 252, 0.72);
-      backdrop-filter: blur(24px) saturate(200%);
-      -webkit-backdrop-filter: blur(24px) saturate(200%);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.65);
-      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255,255,255,0.7);
-      transition: all 0.4s ease;
-    }
-
-    nav.scrolled {
-      height: 60px;
-      background: rgba(248, 248, 252, 0.88);
-      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-    }
-
-    .nav-logo {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .nav-logo .logo-mark {
-      display: none;
-    }
-
-    .nav-logo .logo-text {
-      font-family: var(--sans);
-      font-weight: 700;
-      font-size: 0.8rem;
-      letter-spacing: 5px;
-      text-transform: uppercase;
-      color: var(--ink);
-    }
-
-    nav ul {
-      list-style: none;
-      display: flex;
-      gap: 2px;
-    }
-
-    nav a {
-      text-decoration: none;
-      color: rgba(29, 29, 31, 0.45);
-      font-family: var(--sans);
-      font-weight: 500;
-      font-size: 0.68rem;
-      letter-spacing: 2.5px;
-      text-transform: uppercase;
-      padding: 10px 16px;
-      position: relative;
-      transition: color 0.2s ease;
-    }
-
-    nav a::after {
-      content: '';
-      position: absolute;
-      bottom: 6px;
-      left: 16px;
-      right: 16px;
-      height: 1px;
-      background: var(--ink);
-      transform: scaleX(0);
-      transform-origin: left;
-      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    nav a:hover {
-      color: var(--ink);
-    }
-
-    nav a:hover::after {
-      transform: scaleX(1);
-    }
-
-    nav a.nav-cta {
-      background: rgba(255, 255, 255, 0.65);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.8);
-      border-radius: 100px;
-      padding: 9px 22px;
-      color: var(--ink);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.9);
-      transition: all 0.2s ease;
-    }
-
-    nav a.nav-cta::after {
-      display: none;
-    }
-
-    nav a.nav-cta:hover {
-      background: rgba(29, 29, 31, 0.88);
-      color: var(--paper);
-      border-color: transparent;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.18);
-    }
-
-    .nav-toggle {
-      display: none;
-      background: none;
-      border: 1px solid rgba(13, 13, 13, 0.25);
-      cursor: pointer;
-      padding: 8px;
-      width: 40px;
-      height: 40px;
-      position: relative;
-      transition: border-color 0.2s ease;
-    }
-
-    .nav-toggle:hover {
-      border-color: var(--ink);
-    }
-
-    .nav-toggle span {
-      display: block;
-      width: 18px;
-      height: 1.5px;
-      background: var(--ink);
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      transition: all 0.3s ease;
-    }
-
-    .nav-toggle span:nth-child(1) { top: 13px; }
-    .nav-toggle span:nth-child(2) { top: 19px; }
-    .nav-toggle span:nth-child(3) { top: 25px; }
-
-    .nav-toggle.active span:nth-child(1) {
-      top: 19px;
-      transform: translateX(-50%) rotate(45deg);
-    }
-    .nav-toggle.active span:nth-child(2) { opacity: 0; }
-    .nav-toggle.active span:nth-child(3) {
-      top: 19px;
-      transform: translateX(-50%) rotate(-45deg);
-    }
-
-    /* ---- HERO ---- */
-    .hero {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 120px 48px 80px;
-      position: relative;
-      overflow: hidden;
-      border-bottom: 3px solid var(--ink);
-    }
-
-    .hero-bg-lines {
-      display: none;
-    }
-
-    .hero-rule-top {
-      width: 100%;
-      height: 3px;
-      background: var(--ink);
-      margin-bottom: 32px;
-      opacity: 0;
-      animation: fadeUp 0.6s ease 0.1s forwards;
-    }
-
-    .hero-overline {
-      display: none;
-    }
-
-    .hero-kicker {
-      font-family: var(--sans);
-      font-weight: 600;
-      font-size: 0.7rem;
-      letter-spacing: 5px;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 24px;
-      opacity: 0;
-      animation: fadeUp 0.6s ease 0.2s forwards;
-    }
-
-    .hero-title {
-      margin-bottom: 0;
-      overflow: hidden;
-    }
-
-    .hero-title h1 {
-      font-family: var(--serif);
-      font-weight: 900;
-      font-size: clamp(4rem, 11vw, 10rem);
-      line-height: 0.92;
-      letter-spacing: -4px;
-      color: var(--ink);
-      text-transform: uppercase;
-    }
-
-    .hero-title .line-wrap {
-      overflow: hidden;
-      display: block;
-    }
-
-    .hero-title .line-inner {
-      display: block;
-      opacity: 0;
-      transform: translateY(105%);
-      animation: slideUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
-    .hero-title .line-wrap:nth-child(1) .line-inner { animation-delay: 0.25s; }
-    .hero-title .line-wrap:nth-child(2) .line-inner { animation-delay: 0.38s; }
-    .hero-title .line-wrap:nth-child(3) .line-inner { animation-delay: 0.51s; }
-
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(105%); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .hero-title em {
-      font-style: italic;
-      font-weight: 900;
-      color: var(--ink);
-    }
-
-    .hero-title .light {
-      font-weight: 900;
-      color: var(--ink);
-      text-transform: uppercase;
-    }
-
-    .hero-rule-bottom {
-      width: 100%;
-      height: 3px;
-      background: var(--ink);
-      margin-top: 32px;
-      margin-bottom: 40px;
-      opacity: 0;
-      animation: fadeUp 0.6s ease 0.7s forwards;
-    }
-
-    .hero-subtitle {
-      font-family: var(--serif);
-      font-style: italic;
-      font-size: clamp(1.1rem, 2vw, 1.5rem);
-      color: var(--muted);
-      margin-bottom: 40px;
-      opacity: 0;
-      animation: fadeUp 0.8s ease 0.8s forwards;
-    }
-
-    .hero-cta {
-      display: flex;
-      gap: 16px;
-      flex-wrap: wrap;
-      opacity: 0;
-      animation: fadeUp 0.8s ease 0.9s forwards;
-    }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(16px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      text-decoration: none;
-      font-family: var(--sans);
-      font-weight: 600;
-      font-size: 0.72rem;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      padding: 16px 32px;
-      border: 1.5px solid var(--ink);
-      color: var(--ink);
-      background: transparent;
-      position: relative;
-      overflow: hidden;
-      transition: background 0.12s ease, color 0.12s ease;
-    }
-
-    .btn::before {
-      display: none;
-    }
-
-    .btn:hover {
-      background: var(--ink);
-      color: var(--paper);
-      border-color: var(--ink);
-    }
-
-    .btn span,
-    .btn svg {
-      position: relative;
-      z-index: 1;
-    }
-
-    .btn-primary {
-      background: var(--ink);
-      border-color: var(--ink);
-      color: var(--paper);
-    }
-
-    .btn-primary:hover {
-      background: transparent;
-      color: var(--ink);
-    }
-
-    .icon {
-      width: 16px;
-      height: 16px;
-      flex-shrink: 0;
-    }
-
-    /* ---- STATS BAND ---- */
-    .stats-band {
-      background: transparent;
-      width: 100%;
-    }
-
-    /* ---- STATS ---- */
-    .stats {
-      padding: 80px 48px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 0;
-      background-color: rgba(255, 255, 255, 0.07);
-      background-image:
-        radial-gradient(ellipse 70% 55% at 18% -8%, rgba(255,255,255,0.22) 0%, transparent 72%),
-        linear-gradient(168deg, rgba(255,255,255,0.44) 0%, rgba(255,255,255,0.08) 38%, rgba(255,255,255,0.01) 66%, rgba(255,255,255,0.07) 100%);
-      backdrop-filter: blur(40px) saturate(200%) brightness(1.08);
-      -webkit-backdrop-filter: blur(40px) saturate(200%) brightness(1.08);
-      border-top: 1px solid rgba(255, 255, 255, 0.95);
-      border-left: 1px solid rgba(255, 255, 255, 0.5);
-      border-right: 1px solid rgba(255, 255, 255, 0.3);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.18);
-      border-radius: 20px;
-      box-shadow: 0 8px 40px rgba(0,0,0,0.14), 0 2px 10px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -1px 0 rgba(255,255,255,0.06);
-      overflow: hidden;
-    }
-
-    .stat-card {
-      background: transparent;
-      padding: 56px 24px;
-      text-align: center;
-      position: relative;
-      border-right: 1px solid rgba(0, 0, 0, 0.06);
-    }
-
-    .stat-card:last-child {
-      border-right: none;
-    }
-
-    .stat-number {
-      font-family: var(--serif);
-      font-weight: 900;
-      font-size: 4rem;
-      letter-spacing: -2px;
-      line-height: 1;
-      margin-bottom: 16px;
-      color: var(--ink);
-      position: relative;
-    }
-
-    .stat-label {
-      font-family: var(--sans);
-      font-weight: 600;
-      font-size: 0.6rem;
-      text-transform: uppercase;
-      letter-spacing: 4px;
-      color: var(--muted);
-      position: relative;
-    }
-
-    /* ---- SECTION SHARED ---- */
-    section {
-      padding: 80px 48px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    section:first-of-type {
-      padding-top: 140px;
-    }
-
-    .section-inner {
-      display: block;
-    }
-
-    .section-header {
-      display: none;
-    }
-
-    .section-number {
-      display: none;
-    }
-
-    .section-label {
-      display: block;
-      font-family: var(--sans);
-      font-weight: 600;
-      font-size: 0.6rem;
-      text-transform: uppercase;
-      letter-spacing: 4px;
-      color: var(--muted);
-      margin-bottom: 16px;
-    }
-
-    .section-label .dot {
-      display: none;
-    }
-
-    .section-title {
-      font-family: var(--serif);
-      font-weight: 900;
-      font-size: clamp(1.6rem, 3vw, 2.2rem);
-      color: var(--ink);
-      letter-spacing: -1px;
-      line-height: 1.05;
-      border-top: 1px solid rgba(0, 0, 0, 0.1);
-      padding-top: 16px;
-    }
-
-    .section-title em {
-      font-style: italic;
-      color: var(--ink);
-    }
-
-    .section-content {
-      padding-top: 0;
-    }
-
-    /* ---- EXPERIENCE ---- */
-    .timeline {
-      position: relative;
-      padding-left: 0;
-    }
-
-    .timeline-item {
-      position: relative;
-      padding: 28px 32px 40px;
-      background-color: rgba(255, 255, 255, 0.07);
-      background-image:
-        radial-gradient(ellipse 70% 55% at 18% -8%, rgba(255,255,255,0.22) 0%, transparent 72%),
-        linear-gradient(168deg, rgba(255,255,255,0.44) 0%, rgba(255,255,255,0.08) 38%, rgba(255,255,255,0.01) 66%, rgba(255,255,255,0.07) 100%);
-      backdrop-filter: blur(40px) saturate(200%) brightness(1.08);
-      -webkit-backdrop-filter: blur(40px) saturate(200%) brightness(1.08);
-      border-top: 1px solid rgba(255, 255, 255, 0.95);
-      border-left: 1px solid rgba(255, 255, 255, 0.5);
-      border-right: 1px solid rgba(255, 255, 255, 0.3);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.18);
-      border-radius: 20px;
-      box-shadow: 0 8px 40px rgba(0,0,0,0.14), 0 2px 10px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -1px 0 rgba(255,255,255,0.06);
-      margin-bottom: 16px;
-      overflow: hidden;
-      transition: box-shadow 0.3s ease, transform 0.3s ease;
-    }
-
-    .timeline-item:last-child {
-      margin-bottom: 0;
-    }
-
-    .timeline-item:hover {
-      box-shadow: 0 16px 56px rgba(0,0,0,0.18), 0 4px 16px rgba(0,0,0,0.09), inset 0 1px 0 rgba(255,255,255,0.98), inset 0 -1px 0 rgba(255,255,255,0.08);
-      transform: translateY(-3px);
-    }
-
-    .timeline-dot {
-      display: none;
-    }
-
-    .timeline-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-bottom: 4px;
-    }
-
-    .timeline-title {
-      display: flex;
-      align-items: baseline;
-      flex-wrap: wrap;
-      gap: 0;
-    }
-
-    .timeline-company {
-      font-family: var(--sans);
-      font-weight: 500;
-      font-size: 1.05rem;
-      letter-spacing: 0;
-      text-transform: none;
-      color: var(--muted);
-    }
-
-    .timeline-at {
-      font-family: var(--sans);
-      font-weight: 400;
-      font-size: 1rem;
-      color: var(--muted);
-      opacity: 0.6;
-      padding: 0 6px;
-    }
-
-    .timeline-date {
-      font-family: var(--sans);
-      font-weight: 400;
-      font-size: 0.7rem;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--muted);
-      padding: 4px 14px;
-      border: 1px solid rgba(0, 0, 0, 0.07);
-      border-radius: 100px;
-      background: rgba(255, 255, 255, 0.6);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
-    }
-
-    .timeline-role {
-      font-family: var(--sans);
-      font-size: 1.05rem;
-      font-style: normal;
-      font-weight: 700;
-      color: var(--ink);
-    }
-
-    .stat-icon {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 16px;
-    }
-
-    .stat-icon svg {
-      width: 26px;
-      height: 26px;
-      color: rgba(29, 29, 31, 0.4);
-      stroke-width: 1.5;
-    }
-
-    .timeline-location {
-      font-family: var(--sans);
-      font-size: 0.72rem;
-      color: var(--muted);
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      margin-bottom: 24px;
-    }
-
-    .timeline-bullets {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-    }
-
-    .timeline-bullets li {
-      position: relative;
-      padding: 12px 0 12px 16px;
-      font-size: 0.88rem;
-      line-height: 1.65;
-      color: var(--text);
-      border-left: 2px solid rgba(0, 0, 0, 0.08);
-    }
-
-    .timeline-bullets li + li {
-      border-top: 1px solid rgba(0, 0, 0, 0.05);
-    }
-
-    .timeline-bullets li::before {
-      display: none;
-    }
-
-    /* ---- EDUCATION ---- */
-    .edu-card {
-      padding: 48px;
-      background-color: rgba(255, 255, 255, 0.07);
-      background-image:
-        radial-gradient(ellipse 70% 55% at 18% -8%, rgba(255,255,255,0.22) 0%, transparent 72%),
-        linear-gradient(168deg, rgba(255,255,255,0.44) 0%, rgba(255,255,255,0.08) 38%, rgba(255,255,255,0.01) 66%, rgba(255,255,255,0.07) 100%);
-      backdrop-filter: blur(40px) saturate(200%) brightness(1.08);
-      -webkit-backdrop-filter: blur(40px) saturate(200%) brightness(1.08);
-      border-top: 1px solid rgba(255, 255, 255, 0.95);
-      border-left: 1px solid rgba(255, 255, 255, 0.5);
-      border-right: 1px solid rgba(255, 255, 255, 0.3);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.18);
-      border-radius: 20px;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 8px 40px rgba(0,0,0,0.14), 0 2px 10px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -1px 0 rgba(255,255,255,0.06);
-      transition: box-shadow 0.3s ease, transform 0.3s ease;
-    }
-
-    .edu-card:hover {
-      box-shadow: 0 12px 48px rgba(0,0,0,0.14), 0 4px 12px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.9);
-      transform: translateY(-3px);
-    }
-
-    .edu-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-bottom: 8px;
-    }
-
-    .edu-school {
-      font-family: var(--sans);
-      font-weight: 700;
-      font-size: 1.1rem;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--ink);
-    }
-
-    .edu-date {
-      font-family: var(--sans);
-      font-weight: 400;
-      font-size: 0.7rem;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--muted);
-      padding: 4px 14px;
-      border: 1px solid rgba(0, 0, 0, 0.07);
-      border-radius: 100px;
-      background: rgba(255, 255, 255, 0.6);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
-    }
-
-    .edu-degree {
-      font-family: var(--serif);
-      font-size: 1.05rem;
-      font-style: italic;
-      font-weight: 700;
-      color: var(--ink);
-      margin-bottom: 20px;
-    }
-
-    .edu-coursework {
-      font-size: 0.82rem;
-      color: var(--muted);
-      line-height: 1.7;
-      letter-spacing: 0.3px;
-    }
-
-    .edu-coursework strong {
-      color: var(--text);
-      font-weight: 600;
-    }
-
-    /* ---- SKILLS ---- */
-    .skills-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 40px 48px;
-    }
-
-    .skills-group {
-      margin-bottom: 0;
-    }
-
-    .skills-group-title {
-      font-family: var(--sans);
-      font-weight: 600;
-      font-size: 0.65rem;
-      text-transform: uppercase;
-      letter-spacing: 4px;
-      margin-bottom: 20px;
-      color: var(--ink);
-      padding-bottom: 14px;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .pills {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .pill {
-      display: inline-block;
-      font-family: var(--sans);
-      font-weight: 500;
-      font-size: 0.72rem;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      padding: 10px 18px;
-      background-color: rgba(255, 255, 255, 0.22);
-      background-image: linear-gradient(155deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.05) 100%);
-      backdrop-filter: blur(16px) saturate(180%);
-      -webkit-backdrop-filter: blur(16px) saturate(180%);
-      border: 1px solid rgba(255, 255, 255, 0.65);
-      border-top-color: rgba(255, 255, 255, 0.9);
-      border-radius: 100px;
-      color: var(--ink);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.7);
-      cursor: default;
-      transition: all 0.2s ease;
-    }
-
-    .pill:hover {
-      background: rgba(29, 29, 31, 0.88);
-      color: var(--paper);
-      border-color: transparent;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.16);
-    }
-
-    .pill span {
-      position: relative;
-      z-index: 1;
-    }
-
-    /* ---- FOOTER ---- */
-    footer {
-      position: relative;
-      overflow: hidden;
-      background-color: rgba(255, 255, 255, 0.18);
-      background-image: linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.06) 100%);
-      backdrop-filter: blur(36px) saturate(180%) brightness(1.06);
-      -webkit-backdrop-filter: blur(36px) saturate(180%) brightness(1.06);
-      border-top: 1px solid rgba(255, 255, 255, 0.7);
-      box-shadow: 0 -4px 24px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.7);
-    }
-
-    .footer-glow {
-      display: none;
-    }
-
-    .footer-content {
-      position: relative;
-      text-align: center;
-      padding: 100px 48px;
-      max-width: 1100px;
-      margin: 0 auto;
-    }
-
-    .footer-title {
-      font-family: var(--serif);
-      font-weight: 800;
-      font-size: clamp(2.2rem, 5vw, 3.5rem);
-      color: var(--ink);
-      letter-spacing: -1px;
-      margin-bottom: 12px;
-    }
-
-    .footer-title em {
-      font-style: italic;
-      color: var(--ink);
-    }
-
-    .footer-sub {
-      font-family: var(--sans);
-      color: var(--muted);
-      font-size: 0.82rem;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      margin-bottom: 48px;
-    }
-
-    .footer-links {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin-bottom: 64px;
-    }
-
-    .footer-links a {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      text-decoration: none;
-      font-family: var(--sans);
-      font-weight: 600;
-      font-size: 0.7rem;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      padding: 14px 28px;
-      background: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.85);
-      border-radius: 100px;
-      color: var(--ink);
-      box-shadow: 0 1px 4px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9);
-      transition: all 0.2s ease;
-    }
-
-    .footer-links a:hover {
-      background: rgba(29, 29, 31, 0.88);
-      color: var(--paper);
-      border-color: transparent;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.18);
-    }
-
-    .footer-links a span,
-    .footer-links a svg {
-      position: relative;
-      z-index: 1;
-    }
-
-    .footer-copy {
-      font-family: var(--sans);
-      font-size: 0.65rem;
-      color: var(--muted);
-      letter-spacing: 3px;
-      text-transform: uppercase;
-    }
-
-    /* ---- SECTION RULE ---- */
-    .section-rule {
-      width: 100%;
-      height: 1px;
-      background: rgba(0, 0, 0, 0.07);
-    }
-
-    /* ---- CUSTOM CURSOR ---- */
-    @media (pointer: fine) {
-      body { cursor: none; }
-      a, button, .pill, .btn { cursor: none; }
-    }
-
-    .cursor {
-      position: fixed;
-      width: 10px;
-      height: 10px;
-      background: var(--ink);
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 99999;
-      transform: translate(-50%, -50%);
-      transition: width 0.15s ease, height 0.15s ease, opacity 0.15s ease;
-      opacity: 0;
-    }
-
-    .cursor.active {
-      opacity: 1;
-    }
-
-    .cursor.hover {
-      width: 24px;
-      height: 24px;
-      background: transparent;
-      border: 1.5px solid var(--ink);
-    }
-
-    /* ---- RESPONSIVE ---- */
-    @media (max-width: 768px) {
-      nav {
-        padding: 0 24px;
-      }
-
-      nav ul {
-        position: fixed;
-        top: 72px;
-        left: 0;
-        right: 0;
-        background: rgba(232, 232, 238, 0.96);
-        backdrop-filter: blur(24px) saturate(200%);
-        -webkit-backdrop-filter: blur(24px) saturate(200%);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.6);
-        flex-direction: column;
-        padding: 20px 24px;
-        gap: 4px;
-        transform: translateY(-120%);
-        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-      }
-
-      nav ul.open {
-        transform: translateY(0);
-      }
-
-      .nav-toggle {
-        display: block;
-      }
-
-      .hero {
-        padding: 100px 24px 60px;
-      }
-
-      .hero-title h1 {
-        letter-spacing: -2px;
-      }
-
-      section {
-        padding: 80px 24px;
-      }
-
-      .section-inner {
-        grid-template-columns: 1fr;
-        gap: 32px;
-      }
-
-      .section-header {
-        position: static;
-      }
-
-      .section-number {
-        font-size: 4rem;
-      }
-
-      .stats {
-        padding: 60px 24px;
-      }
-
-      .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .skills-grid {
-        grid-template-columns: 1fr;
-        gap: 36px;
-      }
-
-      .edu-card {
-        padding: 32px;
-      }
-
-      .footer-content {
-        padding: 80px 24px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .stats-grid {
-        grid-template-columns: 1fr;
-        gap: 0;
-      }
-
-      .hero-cta {
-        flex-direction: column;
-      }
-
-      .btn {
-        justify-content: center;
-      }
-
-      .footer-links {
-        flex-direction: column;
-        align-items: center;
-      }
-
-      .hero-title h1 {
-        font-size: 2.8rem;
-        letter-spacing: -1px;
-      }
-
-      .section-inner {
-        grid-template-columns: 1fr;
-      }
-
-      .skills-grid {
-        grid-template-columns: 1fr;
-        gap: 36px;
-      }
-
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Michael Zoghb</title>
+<meta name="description" content="Operating at the intersection of physical and digital systems. $150M+ in global spend across 100+ countries.">
+<meta property="og:title" content="Michael Zoghb">
+<meta property="og:description" content="Operating at the intersection of physical and digital systems. $150M+ in global spend across 100+ countries.">
+<meta property="og:url" content="https://hiremichaelnow.com">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<link rel="canonical" href="https://hiremichaelnow.com">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%230A1A2F'/><text x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-family='Inter,sans-serif' font-size='14' font-weight='800' fill='%23F0ECE4'>MZ</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600;700&family=Fraunces:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #F0ECE4;
+    --paper-light: #F8F4EC;
+    --ink: #0A1A2F;
+    --ink-80: rgba(10,26,47,0.8);
+    --ink-60: rgba(10,26,47,0.6);
+    --ink-30: rgba(10,26,47,0.3);
+    --ink-12: rgba(10,26,47,0.12);
+    --accent: #D85A3A;
+    --accent-soft: rgba(216,90,58,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* === Atmosphere layers (light, grid, grain) === */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 65% 40%, rgba(255,255,255,0.55) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 50% at 15% 85%, rgba(216,90,58,0.07) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(10,26,47,0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(10,26,47,0.035) 1px, transparent 1px);
+    background-size: 64px 64px;
+    pointer-events: none;
+    z-index: 0;
+    mask-image: radial-gradient(ellipse 100% 100% at 50% 40%, black 30%, transparent 75%);
+  }
+
+  /* Grain overlay (SVG noise) */
+  .grain {
+    position: fixed; inset: 0; pointer-events: none; z-index: 1;
+    opacity: 0.35;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 240 240' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.04 0 0 0 0 0.1 0 0 0 0 0.18 0 0 0 0.32 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 240px 240px;
+  }
+
+  /* === Page shell === */
+  .shell {
+    position: relative;
+    z-index: 2;
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    padding: 28px 48px 28px;
+    max-width: 1440px;
+    margin: 0 auto;
+  }
+
+  /* === Top nav === */
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 12px;
+    opacity: 0;
+    animation: fadeDown 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s forwards;
+  }
+  .nav-left {
+    display: flex; align-items: center; gap: 28px;
+  }
+  .mark {
+    display: flex; align-items: center; gap: 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 2.5px;
+    color: var(--ink);
+  }
+  .mark-dot {
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px rgba(216,90,58,0.18);
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 4px rgba(216,90,58,0.18); }
+    50% { box-shadow: 0 0 0 7px rgba(216,90,58,0.06); }
+  }
+  .timestamp {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 1.6px;
+    color: var(--ink-60);
+  }
+  .timestamp .live {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px rgba(216,90,58,0.18);
+    animation: pulse 2.4s ease-in-out infinite;
+    margin-right: 12px;
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
+  }
+  .nav-right {
+    display: flex; gap: 24px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    color: var(--ink-60);
+  }
+  .nav-right a {
+    color: inherit; text-decoration: none;
+    padding-bottom: 2px;
+    border-bottom: 1px solid transparent;
+    transition: all 0.2s;
+  }
+  .nav-right a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* === Main hero === */
+  .hero {
+    display: grid;
+    grid-template-columns: 0.95fr 1.05fr;
+    align-items: center;
+    gap: 32px;
+    padding: 32px 0 24px;
+  }
+
+  /* Left text column */
+  .hero-text { max-width: 600px; }
+  .reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    animation: rise 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  }
+  .reveal.d1 { animation-delay: 0.25s; }
+  .reveal.d2 { animation-delay: 0.4s; }
+  .reveal.d3 { animation-delay: 0.55s; }
+  .reveal.d4 { animation-delay: 0.7s; }
+  .reveal.d5 { animation-delay: 0.85s; }
+  @keyframes rise {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn { to { opacity: 1; } }
+
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 2.4px;
+    color: var(--accent);
+    margin-bottom: 28px;
+  }
+  .eyebrow::before {
+    content: ''; display: inline-block;
+    width: 32px; height: 1px;
+    background: var(--accent);
+  }
+
+  .headline {
+    font-family: 'Inter', sans-serif;
+    font-weight: 900;
+    font-size: clamp(3.5rem, 8.5vw, 8rem);
+    line-height: 0.92;
+    letter-spacing: -3.5px;
+    color: var(--ink);
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .headline .dot { color: var(--accent); }
+  .headline .last { display: block; }
+  .headline-id {
+    position: absolute;
+    top: 6px; right: 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 1.8px;
+    color: var(--ink-30);
+    transform: rotate(0);
+  }
+  .headline-id::before {
+    content: ''; display: inline-block;
+    width: 18px; height: 1px;
+    background: var(--ink-30);
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+
+  .doc-meta {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 26px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.62rem;
+    font-weight: 500;
+    letter-spacing: 1.6px;
+    color: var(--ink-60);
+  }
+  .doc-meta .sep { color: var(--ink-30); }
+
+  .subhead {
+    font-family: 'Fraunces', Georgia, serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(1.15rem, 1.65vw, 1.42rem);
+    line-height: 1.4;
+    color: var(--ink-80);
+    margin-bottom: 36px;
+    max-width: 480px;
+  }
+  .subhead em {
+    font-style: italic;
+    color: var(--ink);
+    background-image: linear-gradient(transparent 70%, rgba(216,90,58,0.18) 70%);
+  }
+
+  .ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+  .cta {
+    position: relative;
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 14px 22px;
+    border: 1.5px solid var(--ink);
+    color: var(--ink);
+    text-decoration: none;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 1.6px;
+    text-transform: uppercase;
+    background: transparent;
+    transition: all 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+    cursor: pointer;
+    overflow: hidden;
+  }
+  .cta::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: var(--ink);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s cubic-bezier(0.7, 0, 0.2, 1);
+    z-index: -1;
+  }
+  .cta:hover::before { transform: scaleX(1); }
+  .cta:hover { color: var(--paper); }
+  .cta.primary {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .cta.primary::before { background: var(--accent); }
+  .cta.primary:hover { border-color: var(--accent); color: var(--paper); }
+  .cta .arrow { font-size: 0.85rem; transition: transform 0.25s; }
+  .cta:hover .arrow { transform: translateX(4px); }
+
+  /* === 3D centerpiece === */
+  .stage {
+    position: relative;
+    aspect-ratio: 1;
+    max-width: 540px;
+    margin-left: -24px;
+    perspective: 1200px;
+    opacity: 0;
+    animation: fadeIn 1s ease-out 0.6s forwards;
+  }
+  .stage-inner {
+    position: relative;
+    width: 100%; height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .stage svg {
+    width: 100%; height: 100%;
+    display: block;
+  }
+
+  /* Background particle field */
+  .particles {
+    position: absolute; inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .particle {
+    position: absolute;
+    width: 2px; height: 2px;
+    background: var(--ink);
+    border-radius: 50%;
+    opacity: 0.18;
+    animation: drift-p 14s linear infinite;
+  }
+  @keyframes drift-p {
+    0% { transform: translate(0, 0); opacity: 0; }
+    10% { opacity: 0.3; }
+    90% { opacity: 0.18; }
+    100% { transform: translate(20px, -30px); opacity: 0; }
+  }
+
+  .globe {
+    transform-origin: center;
+    animation: drift 90s linear infinite;
+  }
+  @keyframes drift {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  /* Floating annotation cards */
+  .annot {
+    position: absolute;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    background: rgba(248,244,236,0.85);
+    border: 1px solid var(--ink-12);
+    padding: 10px 14px;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.7) inset,
+      0 12px 28px -12px rgba(10,26,47,0.18);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 4px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.62rem;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    animation: floaty 6s ease-in-out infinite;
+    z-index: 3;
+    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .annot-icon {
+    width: 14px !important;
+    height: 14px !important;
+    flex-shrink: 0;
+    flex-grow: 0;
+    color: var(--accent);
+    display: inline-block;
+  }
+  .annot .label {
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-right: 6px;
+  }
+  .annot .val { color: var(--ink); }
+  .annot .index {
+    display: inline-block;
+    margin-right: 8px;
+    font-size: 0.55rem;
+    color: var(--ink-30);
+  }
+  @keyframes floaty {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+
+  .annot.a1 { top: 16%; left: -10%; animation-delay: 0s; }
+  .annot.a2 { top: 38%; right: -4%; animation-delay: 2s; }
+  .annot.a3 { bottom: 22%; left: 4%; animation-delay: 4s; }
+
+  /* Lane traffic dots (orange dots traveling along lanes) */
+  .lane-dot {
+    fill: var(--accent);
+    filter: drop-shadow(0 0 4px rgba(216,90,58,0.8));
+  }
+
+  /* === Stats strip === */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid var(--ink-12);
+    border-bottom: 1px solid var(--ink-12);
+    padding: 28px 0;
+    margin-top: 16px;
+    opacity: 0;
+    animation: fadeIn 0.8s ease-out 1s forwards;
+  }
+  .stat {
+    padding: 0 28px;
+    border-right: 1px dashed var(--ink-12);
+    position: relative;
+    transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .stat:last-child { border-right: none; }
+  .stat:hover { transform: translateY(-3px); }
+  .stat-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 1.8px;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .stat-icon {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    color: var(--accent);
+  }
+  .stat-value {
+    font-family: 'Inter', sans-serif;
+    font-weight: 800;
+    font-size: clamp(1.5rem, 2.4vw, 2.1rem);
+    color: var(--ink);
+    letter-spacing: -1.2px;
+    line-height: 1;
+    margin-bottom: 10px;
+  }
+  .stat-spark {
+    width: 100%; height: 22px;
+    margin-bottom: 8px;
+    opacity: 0.85;
+  }
+  .stat-detail {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.7rem;
+    color: var(--ink-60);
+    line-height: 1.4;
+  }
+
+  /* === Footer === */
+  .foot {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-top: 22px;
+    margin-top: 18px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.66rem;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    color: var(--ink-60);
+    opacity: 0;
+    animation: fadeIn 0.7s ease-out 1.3s forwards;
+  }
+  .foot-left { display: flex; gap: 24px; flex-wrap: wrap; }
+  .foot a { color: inherit; text-decoration: none; transition: color 0.2s; }
+  .foot a:hover { color: var(--accent); }
+  .easter {
+    display: inline-flex; align-items: center; gap: 8px;
+    color: var(--ink-30);
+    cursor: pointer;
+    transition: color 0.25s;
+  }
+  .easter:hover { color: var(--accent); }
+  .easter-q {
+    width: 20px; height: 20px;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.65rem;
+    font-weight: 700;
+    transition: all 0.25s;
+  }
+  .easter:hover .easter-q { background: var(--accent); color: white; border-color: var(--accent); }
+
+  @media (max-width: 900px) {
+    .shell { padding: 20px 22px; }
+    .hero { grid-template-columns: 1fr; gap: 24px; padding: 32px 0 12px; }
+    .stage { max-width: 100%; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .stat { padding: 12px 18px; border-bottom: 1px dashed var(--ink-12); }
+    .timestamp { display: none; }
+    .headline-id { display: none; }
+  }
+</style>
 </head>
 <body>
+<div class="grain"></div>
 
-  <!-- NAV -->
-  <nav id="mainNav">
-    <div class="nav-logo">
-      <div class="logo-mark"></div>
-      <span class="logo-text">Michael Zoghb</span>
+<div class="shell">
+
+  <!-- Nav -->
+  <nav class="nav">
+    <div class="nav-left">
+      <div class="timestamp">
+        <span class="live"></span><span id="ts">--:--:-- · --</span>
+      </div>
     </div>
-    <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
-      <span></span><span></span><span></span>
-    </button>
-    <ul id="navMenu">
-      <li><a href="#about">About</a></li>
-      <li><a href="#experience">Experience</a></li>
-      <li><a href="#education">Education</a></li>
-      <li><a href="#skills">Skills</a></li>
-      <li><a href="#contact" class="nav-cta">Hire Michael</a></li>
-    </ul>
+    <div class="nav-right">
+      <a href="https://www.linkedin.com/in/m--elie/" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="mailto:michaelzoghb@gmail.com">Contact</a>
+    </div>
   </nav>
 
-  <!-- HERO -->
-  <section class="hero">
-    <p class="hero-subtitle">I make supply chains cost less and move faster.</p>
-    <div class="hero-cta">
-      <a href="#experience" class="btn btn-primary">View Experience</a>
-      <a href="#contact" class="btn">Get in Touch</a>
-    </div>
-  </section>
+  <!-- Hero -->
+  <main class="hero">
 
-  <!-- EXPERIENCE -->
-  <section id="experience">
-    <div class="section-inner">
-    <div class="section-header reveal">
-      <span class="section-number">01</span>
-      <div class="section-label">Career</div>
-      <h2 class="section-title">Work <em>Experience</em></h2>
-    </div>
-    <div class="section-content">
-    <div class="timeline">
-      <!-- AVI-SPL -->
-      <div class="timeline-item reveal-left">
-        <div class="timeline-dot"></div>
-        <div class="timeline-meta">
-          <div class="timeline-title">
-            <span class="timeline-role">Global Supply Chain Analyst</span><span class="timeline-at">@</span><span class="timeline-company">AVI-SPL</span>
-          </div>
-          <span class="timeline-date">2024 &ndash; Present</span>
-        </div>
-        <div class="timeline-location">Remote (San Francisco, California)</div>
-        <ul class="timeline-bullets">
-          <li>Delivered 10% annual cost savings by performing company-wide cost-benefit and TCO analyses, presenting actionable recommendations to executive leadership &mdash; all fully adopted.</li>
-          <li>Reduced procurement cycle times by 20% and enhanced sourcing scalability across $150M in annual spend by leading strategic procurement initiatives, standardizing workflows, and aligning cross-functional teams.</li>
-          <li>Automated procurement, logistics, and invoicing workflows with AI, boosting team productivity 30% while achieving 100% accuracy rate.</li>
-          <li>Developed and maintained dashboards and business intelligence tools to monitor logistics, procurement, warehousing, and inventory KPIs, improving visibility and enabling proactive decision-making.</li>
-        </ul>
-      </div>
+    <div class="hero-text">
+      <div class="eyebrow reveal d1">SUPPLY CHAIN · OPERATIONS · ON-CHAIN</div>
 
-      <!-- Bob's Red Mill -->
-      <div class="timeline-item reveal-left">
-        <div class="timeline-dot"></div>
-        <div class="timeline-meta">
-          <div class="timeline-title">
-            <span class="timeline-role">Sourcing Specialist</span><span class="timeline-at">@</span><span class="timeline-company">Bob's Red Mill</span>
-          </div>
-          <span class="timeline-date">2023 &ndash; 2024</span>
-        </div>
-        <div class="timeline-location">Milwaukie, Oregon</div>
-        <ul class="timeline-bullets">
-          <li>Drove Source-to-Contract initiatives (supplier sourcing, contract negotiation, TCO analysis), optimizing strategic vendor selection and achieving $500K+ in annual savings across 100+ raw materials.</li>
-          <li>Optimized Procure-to-Pay operations by aligning and educating finance, accounting, and procurement teams with the ERP system, strengthening team accountability while maintaining a 99% on-time delivery rate.</li>
-          <li>Reduced procurement costs by 12% via supplier pool expansion and securing competitive contracts through market benchmarking and data-driven negotiations.</li>
-          <li>Maintained alignment with evolving operational needs through comprehensive supplier audits and performed quarterly performance reviews to validate production capabilities and ensure compliance.</li>
-        </ul>
-      </div>
+      <h1 class="headline reveal d2">
+        Michael<br>
+        <span class="last">Zoghb<span class="dot">.</span></span>
+      </h1>
 
-      <!-- Mainfreight -->
-      <div class="timeline-item reveal-left">
-        <div class="timeline-dot"></div>
-        <div class="timeline-meta">
-          <div class="timeline-title">
-            <span class="timeline-role">Air &amp; Ocean Operations</span><span class="timeline-at">@</span><span class="timeline-company">Mainfreight</span>
-          </div>
-          <span class="timeline-date">2021 &ndash; 2023</span>
-        </div>
-        <div class="timeline-location">Portland, Oregon</div>
-        <ul class="timeline-bullets">
-          <li>Managed a portfolio of 30+ clients, generating annual revenue of $40 million and achieving 15% YoY growth.</li>
-          <li>Facilitated international imports and exports across 20+ countries, optimizing efficiency by 25% and reducing annual costs by $300K.</li>
-          <li>Pioneered novel strategies for international trade during COVID-19 supply crunch, resulting in 30% faster delivery times and a 20% decrease in transportation costs for 80% of shipments.</li>
-          <li>Established strong relationships with major carriers, successfully negotiating contracts that improved the bottom line by $1.2 million.</li>
-          <li>Collaborated with overseas teams in 18 countries to ensure secure and timely cargo delivery while maintaining 100% compliance with international trade regulations.</li>
-        </ul>
-      </div>
-    </div>
-    </div>
-    </div>
-  </section>
+      <p class="subhead reveal d3">
+        Operating at the intersection of <em>physical and digital systems</em>, driving end-to-end supply chain sustainability and managing $150M+ in global spend across 100+ countries.
+      </p>
 
-  <!-- STATS BAND -->
-  <div class="stats-band">
-  <section class="stats" id="about">
-    <div class="stats-grid">
-      <div class="stat-card reveal stagger-1">
-        <div class="stat-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-        </div>
-        <div class="stat-number" data-target="150" data-prefix="$" data-suffix="M">$0M</div>
-        <div class="stat-label">Annual Spend</div>
-      </div>
-      <div class="stat-card reveal stagger-2">
-        <div class="stat-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-        </div>
-        <div class="stat-number" data-target="10" data-suffix="%">0%</div>
-        <div class="stat-label">Cost Savings</div>
-      </div>
-      <div class="stat-card reveal stagger-3">
-        <div class="stat-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        </div>
-        <div class="stat-number" data-target="99" data-suffix="%">0%</div>
-        <div class="stat-label">On-Time Delivery</div>
-      </div>
-      <div class="stat-card reveal stagger-4">
-        <div class="stat-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-        </div>
-        <div class="stat-number" data-target="20" data-suffix="+">0+</div>
-        <div class="stat-label">Countries</div>
-      </div>
-    </div>
-  </section>
-  </div>
-
-  <div class="section-rule"></div>
-
-  <!-- EDUCATION -->
-  <section id="education">
-    <div class="section-inner">
-    <div class="section-header reveal">
-      <span class="section-number">02</span>
-      <div class="section-label">Education</div>
-      <h2 class="section-title">Academic <em>Background</em></h2>
-    </div>
-    <div class="section-content">
-    <div class="edu-card reveal">
-      <div class="edu-meta">
-        <div class="edu-school">Arizona State University</div>
-        <span class="edu-date">2017 &ndash; 2020</span>
-      </div>
-      <div class="edu-degree">BSc in Supply Chain Management &mdash; W.P. Carey School of Business</div>
-      <p class="edu-coursework"><strong>Relevant Coursework:</strong> Global Supply Operations, Business Decision Models, Supply Management, Supply Chain Strategy, Research &amp; Negotiation</p>
-    </div>
-    </div>
-    </div>
-  </section>
-
-  <div class="section-rule"></div>
-
-  <!-- SKILLS -->
-  <section id="skills">
-    <div class="section-inner">
-    <div class="section-header reveal">
-      <span class="section-number">03</span>
-      <div class="section-label">Toolkit</div>
-      <h2 class="section-title">Skills &amp; <em>Qualifications</em></h2>
-    </div>
-    <div class="section-content">
-    <div class="skills-grid">
-      <div class="skills-group reveal stagger-1">
-        <div class="skills-group-title">Languages</div>
-        <div class="pills">
-          <span class="pill"><span>English</span></span>
-          <span class="pill"><span>Arabic</span></span>
-          <span class="pill"><span>Greek</span></span>
-        </div>
-      </div>
-
-      <div class="skills-group reveal stagger-2">
-        <div class="skills-group-title">Technical Proficiency</div>
-        <div class="pills">
-          <span class="pill"><span>Microsoft Excel</span></span>
-          <span class="pill"><span>Power BI</span></span>
-          <span class="pill"><span>Power Apps</span></span>
-          <span class="pill"><span>G-Suite</span></span>
-          <span class="pill"><span>Python</span></span>
-          <span class="pill"><span>JavaScript</span></span>
-          <span class="pill"><span>SQL</span></span>
-        </div>
-      </div>
-
-      <div class="skills-group reveal stagger-3">
-        <div class="skills-group-title">ERP Systems</div>
-        <div class="pills">
-          <span class="pill"><span>Microsoft Dynamics 365</span></span>
-          <span class="pill"><span>Sage</span></span>
-          <span class="pill"><span>SAP</span></span>
-          <span class="pill"><span>CargoWise</span></span>
-        </div>
-      </div>
-
-      <div class="skills-group reveal stagger-4">
-        <div class="skills-group-title">Crypto</div>
-        <div class="pills">
-          <span class="pill"><span>On-Chain Analysis</span></span>
-          <span class="pill"><span>DeFi Protocols</span></span>
-          <span class="pill"><span>DAO Governance</span></span>
-          <span class="pill"><span>Multi-Chain (EVM, Cosmos, Solana)</span></span>
-        </div>
-      </div>
-    </div>
-    </div>
-    </div>
-  </section>
-
-  <!-- FOOTER -->
-  <footer id="contact">
-    <div class="footer-glow"></div>
-    <div class="footer-content">
-      <h2 class="footer-title reveal">Let's <em>Connect</em></h2>
-      <p class="footer-sub reveal stagger-1">Open to business development, operations, and product roles</p>
-      <div class="footer-links reveal stagger-2">
-        <a href="mailto:michaelzoghb@gmail.com">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-          <span>michaelzoghb@gmail.com</span>
-        </a>
-        <a href="tel:+16192544065">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-          <span>(619) 254-4065</span>
-        </a>
-        <a href="https://www.linkedin.com/in/m--elie/" target="_blank" rel="noopener">
-          <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-          <span>LinkedIn</span>
+      <div class="ctas reveal d4">
+        <a class="cta primary" href="mailto:michaelzoghb@gmail.com">
+          Get in touch <span class="arrow">→</span>
         </a>
       </div>
-      <p class="footer-copy">&copy; 2026 Michael Zoghb. All rights reserved.</p>
     </div>
-  </footer>
 
-  <!-- CUSTOM CURSOR -->
-  <div class="cursor" id="cursor"></div>
+    <!-- 3D centerpiece -->
+    <div class="stage" id="stage">
 
-  <script>
-    // ---- NAV SCROLL ----
-    const nav = document.getElementById('mainNav');
-    const navToggle = document.getElementById('navToggle');
-    const navMenu = document.getElementById('navMenu');
+      <!-- Particle field -->
+      <div class="particles">
+        <div class="particle" style="top:14%;left:30%;animation-delay:0s"></div>
+        <div class="particle" style="top:62%;left:14%;animation-delay:2s"></div>
+        <div class="particle" style="top:80%;left:72%;animation-delay:4s"></div>
+        <div class="particle" style="top:24%;left:84%;animation-delay:6s"></div>
+        <div class="particle" style="top:48%;left:56%;animation-delay:8s"></div>
+        <div class="particle" style="top:88%;left:32%;animation-delay:10s"></div>
+        <div class="particle" style="top:8%;left:62%;animation-delay:12s"></div>
+      </div>
 
-    window.addEventListener('scroll', () => {
-      nav.classList.toggle('scrolled', window.scrollY > 50);
-    });
+      <div class="stage-inner" id="stageInner">
 
-    navToggle.addEventListener('click', () => {
-      navToggle.classList.toggle('active');
-      navMenu.classList.toggle('open');
-    });
+        <!-- Annotations -->
+        <div class="annot a1">
+          <svg class="annot-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.5 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
+            <path d="M2 21c0-3 1.85-5.36 5.08-6"/>
+          </svg>
+          <span class="label">Maintaining sustainable supply chains</span>
+        </div>
+        <div class="annot a2">
+          <svg class="annot-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6z"/>
+            <path d="M19 14.5l.8 2.2 2.2.8-2.2.8L19 20.5l-.8-2.2-2.2-.8 2.2-.8z"/>
+          </svg>
+          <span class="label">Building AI-powered workflows</span>
+        </div>
+        <div class="annot a3">
+          <svg class="annot-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 3v18h18"/>
+            <path d="M7 14l4-4 4 4 5-6"/>
+            <path d="M16 8h4v4"/>
+          </svg>
+          <span class="label">Converting data into measurable business outcomes</span>
+        </div>
 
-    // Close mobile nav on link click
-    navMenu.querySelectorAll('a').forEach(a => {
-      a.addEventListener('click', () => {
-        navToggle.classList.remove('active');
-        navMenu.classList.remove('open');
-      });
-    });
+        <svg viewBox="0 0 600 600" id="globe-svg">
+          <defs>
+            <radialGradient id="globefill" cx="38%" cy="32%">
+              <stop offset="0%" stop-color="rgba(255,255,255,0.85)"/>
+              <stop offset="55%" stop-color="rgba(240,236,228,0.6)"/>
+              <stop offset="100%" stop-color="rgba(10,26,47,0.06)"/>
+            </radialGradient>
+            <radialGradient id="globeshadow" cx="50%" cy="50%">
+              <stop offset="60%" stop-color="rgba(10,26,47,0)"/>
+              <stop offset="100%" stop-color="rgba(10,26,47,0.18)"/>
+            </radialGradient>
+            <pattern id="hatch" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
+              <line x1="0" y1="0" x2="0" y2="6" stroke="rgba(10,26,47,0.45)" stroke-width="1.2"/>
+            </pattern>
+            <clipPath id="sphereClip">
+              <circle cx="300" cy="300" r="240"/>
+            </clipPath>
+          </defs>
 
-    // ---- CUSTOM CURSOR ----
-    const cursor = document.getElementById('cursor');
+          <!-- Ground shadow -->
+          <ellipse cx="300" cy="565" rx="200" ry="12" fill="url(#globeshadow)"/>
 
-    document.addEventListener('mousemove', (e) => {
-      cursor.classList.add('active');
-      cursor.style.left = e.clientX + 'px';
-      cursor.style.top = e.clientY + 'px';
-    });
+          <!-- Sphere fill (static) -->
+          <circle cx="300" cy="300" r="240" fill="url(#globefill)"/>
 
-    document.addEventListener('mouseleave', () => {
-      cursor.classList.remove('active');
-    });
+          <!-- Globe content (d3-managed, clipped to sphere) -->
+          <g clip-path="url(#sphereClip)">
+            <!-- Graticule -->
+            <path class="graticule" fill="none" stroke="#0A1A2F" stroke-width="1" opacity="0.42"/>
+            <!-- Land -->
+            <path class="land" fill="#0A1A2F" opacity="0.62"/>
+            <!-- Hemisphere shadow (hatched, on top of land for depth) -->
+            <path d="M 300 60 A 240 240 0 0 1 300 540 A 120 240 0 0 0 300 60 Z" fill="url(#hatch)" opacity="0.32"/>
+            <!-- Lanes (great-circle arcs) -->
+            <g class="lanes"></g>
+            <!-- Suppliers (small navy dots) -->
+            <g class="suppliers"></g>
+            <!-- Ports (orange dots, primary one with rings) -->
+            <g class="ports"></g>
+            <!-- Animated traffic dots — moved by JS along projected lanes -->
+            <g class="traffic">
+              <circle id="traffic-0" r="4" fill="#D85A3A" style="filter:drop-shadow(0 0 4px rgba(216,90,58,0.8))" display="none"/>
+              <circle id="traffic-1" r="3.5" fill="#D85A3A" opacity="0.7" style="filter:drop-shadow(0 0 4px rgba(216,90,58,0.8))" display="none"/>
+              <circle id="traffic-2" r="3.5" fill="#D85A3A" opacity="0.85" style="filter:drop-shadow(0 0 4px rgba(216,90,58,0.8))" display="none"/>
+              <circle id="traffic-3" r="2.5" fill="#D85A3A" opacity="0.5" style="filter:drop-shadow(0 0 4px rgba(216,90,58,0.8))" display="none"/>
+              <circle id="traffic-4" r="3.5" fill="#D85A3A" opacity="0.8" style="filter:drop-shadow(0 0 4px rgba(216,90,58,0.8))" display="none"/>
+              <circle id="traffic-5" r="3" fill="#D85A3A" opacity="0.7" style="filter:drop-shadow(0 0 4px rgba(216,90,58,0.8))" display="none"/>
+              <circle id="traffic-6" r="3" fill="#D85A3A" opacity="0.75" style="filter:drop-shadow(0 0 4px rgba(216,90,58,0.8))" display="none"/>
+            </g>
+          </g>
 
-    const hoverTargets = document.querySelectorAll('a, button, .pill, .btn');
-    hoverTargets.forEach(el => {
-      el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
-      el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
-    });
+          <!-- Sphere outline (above clipped content) -->
+          <circle cx="300" cy="300" r="240" fill="none" stroke="#0A1A2F" stroke-width="2.4"/>
 
-    // ---- SCROLL REVEAL ----
-    const revealElements = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
+        </svg>
 
-    const revealObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-        }
-      });
-    }, {
-      threshold: 0.1,
-      rootMargin: '0px 0px -60px 0px'
-    });
+      </div>
+    </div>
 
-    revealElements.forEach(el => revealObserver.observe(el));
+  </main>
 
-    // ---- ANIMATED COUNTERS ----
-    const counters = document.querySelectorAll('.stat-number[data-target]');
-    let countersAnimated = false;
+  <!-- Stats strip -->
+  <section class="stats">
+    <div class="stat">
+      <div class="stat-label">
+        <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M14.5 9c-.7-.8-2.3-1-3.3-.5s-1.4 1.6-.4 2.3c.7.5 2.5.7 3.4 1.3.9.5.9 2.1-.4 2.6-1.2.5-2.7.2-3.3-.6"/>
+          <path d="M12 6.5v11"/>
+        </svg>
+        SPEND OPTIMIZED
+      </div>
+      <div class="stat-value" data-target="150" data-prefix="$" data-suffix="M+">$0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">
+        <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M3 12h18"/>
+          <path d="M12 3a13 13 0 0 1 0 18"/>
+          <path d="M12 3a13 13 0 0 0 0 18"/>
+        </svg>
+        COUNTRIES OPERATED
+      </div>
+      <div class="stat-value" data-target="100" data-suffix="+">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">
+        <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 8 12 3 3 8v8l9 5 9-5z"/>
+          <path d="M3 8l9 5 9-5"/>
+          <path d="M12 13v10"/>
+        </svg>
+        SKUs SOURCED
+      </div>
+      <div class="stat-value" data-target="100" data-suffix="+">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">
+        <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M12 7v5l3.5 2"/>
+        </svg>
+        ON-TIME DELIVERY
+      </div>
+      <div class="stat-value" data-target="99" data-suffix="%">0</div>
+    </div>
+  </section>
 
-    const counterObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting && !countersAnimated) {
-          countersAnimated = true;
-          animateCounters();
-        }
-      });
-    }, { threshold: 0.3 });
+</div>
 
-    counters.forEach(el => counterObserver.observe(el));
+<script>
+  // === Live timestamp (PT) ===
+  function fmt(n){return n.toString().padStart(2,'0');}
+  function tick(){
+    const d = new Date();
+    const opts = { timeZone: 'America/Los_Angeles', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' };
+    const t = d.toLocaleString('en-US', opts);
+    document.getElementById('ts').textContent = t + ' PT';
+  }
+  tick(); setInterval(tick, 1000);
 
-    function animateCounters() {
-      counters.forEach(counter => {
-        const target = parseInt(counter.dataset.target);
-        const prefix = counter.dataset.prefix || '';
-        const suffix = counter.dataset.suffix || '';
-        const duration = 2000;
-        const start = performance.now();
+  // === Cursor-aware globe parallax ===
+  const stage = document.getElementById('stage');
+  const inner = document.getElementById('stageInner');
+  let targetX = 0, targetY = 0, currentX = 0, currentY = 0;
+  document.addEventListener('mousemove', (e) => {
+    const r = stage.getBoundingClientRect();
+    const cx = r.left + r.width/2;
+    const cy = r.top + r.height/2;
+    const dx = (e.clientX - cx) / window.innerWidth;
+    const dy = (e.clientY - cy) / window.innerHeight;
+    targetX = dx * 14;
+    targetY = -dy * 12;
+  });
+  function loop(){
+    currentX += (targetX - currentX) * 0.08;
+    currentY += (targetY - currentY) * 0.08;
+    inner.style.transform = `rotateY(${currentX}deg) rotateX(${currentY}deg)`;
+    requestAnimationFrame(loop);
+  }
+  loop();
 
-        function update(now) {
-          const elapsed = now - start;
-          const progress = Math.min(elapsed / duration, 1);
-          // Ease out quart
-          const eased = 1 - Math.pow(1 - progress, 4);
-          const current = Math.round(eased * target);
-          counter.textContent = prefix + current + suffix;
+  // === Stats count-up ===
+  function countUp(el){
+    const target = parseFloat(el.dataset.target);
+    const prefix = el.dataset.prefix || '';
+    const suffix = el.dataset.suffix || '';
+    const dur = 1500;
+    const start = performance.now();
+    function step(now){
+      const t = Math.min(1, (now - start) / dur);
+      const eased = 1 - Math.pow(1 - t, 3);
+      const v = Math.round(target * eased);
+      el.textContent = prefix + v + suffix;
+      if (t < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  // Trigger after entrance
+  setTimeout(() => {
+    document.querySelectorAll('.stat-value').forEach(countUp);
+  }, 1100);
+</script>
 
-          if (progress < 1) {
-            requestAnimationFrame(update);
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
+<script>
+  // === D3-driven globe with real geography ===
+  (async function () {
+    const projection = d3.geoOrthographic()
+      .scale(239)
+      .translate([300, 300])
+      .rotate([10, -15])
+      .clipAngle(90);
+
+    const pathGen = d3.geoPath(projection);
+    const graticule = d3.geoGraticule10();
+
+    let world;
+    try {
+      world = await d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/land-110m.json');
+    } catch (e) {
+      console.error('failed to load world-atlas', e);
+      return;
+    }
+    const land = topojson.feature(world, world.objects.land);
+
+    // Real port lat/lng [longitude, latitude]
+    const ports = [
+      { name: 'Los Angeles', coords: [-118.18, 33.77], primary: true },
+      { name: 'Shanghai',    coords: [121.46, 31.22] },
+      { name: 'Hamburg',     coords: [9.99, 53.55] },
+      { name: 'Singapore',   coords: [103.85, 1.27] },
+      { name: 'Cape Town',   coords: [18.42, -33.92] },
+      { name: 'Sydney',      coords: [151.21, -33.85] },
+      { name: 'Rotterdam',   coords: [4.14, 51.95] },
+      { name: 'New York',    coords: [-74.04, 40.69] },
+      { name: 'Mumbai',      coords: [72.84, 19.07] },
+      { name: 'Dubai',       coords: [55.27, 25.27] },
+      { name: 'Buenos Aires',coords: [-58.37, -34.61] },
+      { name: 'Tokyo',       coords: [139.76, 35.68] },
+      { name: 'Santos',      coords: [-46.33, -23.96] },
+    ];
+
+    // Suppliers across continents
+    const suppliers = [
+      [-99.1, 19.4],   // Mexico City
+      [-43.2, -22.9],  // Rio
+      [-58.4, -34.6],  // Buenos Aires
+      [-122.3, 47.6],  // Seattle
+      [-87.6, 41.9],   // Chicago
+      [-79.4, 43.7],   // Toronto
+      [37.6, 55.7],    // Moscow
+      [13.4, 52.5],    // Berlin
+      [2.3, 48.8],     // Paris
+      [-3.2, 55.9],    // Edinburgh
+      [78.0, 28.6],    // Delhi
+      [88.4, 22.6],    // Kolkata
+      [113.2, 23.1],   // Guangzhou
+      [139.7, 35.7],   // Tokyo
+      [126.9, 37.6],   // Seoul
+      [55.3, 25.3],    // Dubai
+      [3.0, 36.7],     // Algiers
+      [31.6, -29.9],   // Durban
+      [36.8, -1.3],    // Nairobi
+      [114.2, -8.4],   // Bali
+    ];
+
+    // Lanes connecting ports (great-circle arcs)
+    const lanes = [
+      { from: ports[0].coords, to: ports[1].coords, primary: true }, // LA → Shanghai
+      { from: ports[6].coords, to: ports[3].coords },                // Rotterdam → Singapore
+      { from: ports[4].coords, to: ports[5].coords },                // Cape Town → Sydney
+      { from: ports[7].coords, to: ports[2].coords },                // NY → Hamburg
+      { from: ports[10].coords, to: ports[4].coords },               // Buenos Aires → Cape Town
+      { from: ports[9].coords, to: ports[8].coords },                // Dubai → Mumbai
+      { from: ports[3].coords, to: ports[5].coords },                // Singapore → Sydney
+      { from: ports[7].coords, to: ports[10].coords },               // NY → Buenos Aires
+      { from: ports[11].coords, to: ports[0].coords },               // Tokyo → LA
+      { from: ports[12].coords, to: ports[2].coords },               // Santos → Hamburg
+      { from: ports[8].coords, to: ports[3].coords },                // Mumbai → Singapore
+    ];
+
+    function isVisible(coords) {
+      const r = projection.rotate();
+      const center = [-r[0], -r[1]];
+      return d3.geoDistance(coords, center) < Math.PI / 2 - 0.02;
+    }
+
+    const svg = d3.select('#globe-svg');
+
+    // Initial port DOM (created once, updated each frame)
+    const portG = svg.select('.ports').selectAll('g.port')
+      .data(ports)
+      .enter()
+      .append('g')
+      .attr('class', 'port');
+    portG.append('circle').attr('class', 'dot').attr('r', 6).attr('fill', '#D85A3A');
+    portG.filter(d => d.primary).append('circle').attr('class', 'ring1').attr('r', 11)
+      .attr('fill', 'none').attr('stroke', '#D85A3A').attr('stroke-width', 1.2).attr('opacity', 0.55);
+    portG.filter(d => d.primary).append('circle').attr('class', 'ring2').attr('r', 22)
+      .attr('fill', 'none').attr('stroke', '#D85A3A').attr('stroke-width', 0.8).attr('opacity', 0.28);
+    portG.filter(d => d.primary).append('circle').attr('class', 'ring3').attr('r', 34)
+      .attr('fill', 'none').attr('stroke', '#D85A3A').attr('stroke-width', 0.5).attr('opacity', 0.15);
+
+    // Initial supplier DOM
+    svg.select('.suppliers').selectAll('circle')
+      .data(suppliers)
+      .enter()
+      .append('circle')
+      .attr('r', 2.5)
+      .attr('fill', '#0A1A2F')
+      .attr('opacity', 0.85);
+
+    // Initial lane DOM
+    svg.select('.lanes').selectAll('path')
+      .data(lanes)
+      .enter()
+      .append('path')
+      .attr('stroke', '#D85A3A')
+      .attr('stroke-width', d => d.primary ? 2.4 : 1.8)
+      .attr('stroke-linecap', 'round')
+      .attr('fill', 'none')
+      .attr('opacity', d => d.primary ? 0.95 : 0.7);
+
+    // Traffic dots state
+    const trafficDots = [
+      { laneIdx: 0, t: 0.0, speed: 0.0028 },  // LA → Shanghai
+      { laneIdx: 1, t: 0.4, speed: 0.0024 },  // Rotterdam → Singapore
+      { laneIdx: 2, t: 0.2, speed: 0.0026 },  // Cape Town → Sydney
+      { laneIdx: 3, t: 0.7, speed: 0.0027 },  // NY → Hamburg
+      { laneIdx: 5, t: 0.3, speed: 0.0030 },  // Dubai → Mumbai
+      { laneIdx: 8, t: 0.5, speed: 0.0026 },  // Tokyo → LA
+      { laneIdx: 0, t: 0.6, speed: 0.0028 },  // LA → Shanghai (second dot)
+    ];
+
+    function render() {
+      // Graticule
+      svg.select('.graticule').datum(graticule).attr('d', pathGen);
+
+      // Land
+      svg.select('.land').datum(land).attr('d', pathGen);
+
+      // Lanes
+      svg.select('.lanes').selectAll('path')
+        .attr('d', d => pathGen({ type: 'LineString', coordinates: [d.from, d.to] }));
+
+      // Ports
+      svg.select('.ports').selectAll('g.port')
+        .each(function (d) {
+          const visible = isVisible(d.coords);
+          if (visible) {
+            const proj = projection(d.coords);
+            d3.select(this)
+              .attr('transform', `translate(${proj[0]},${proj[1]})`)
+              .attr('display', null);
+          } else {
+            d3.select(this).attr('display', 'none');
           }
-        }
+        });
 
-        requestAnimationFrame(update);
+      // Suppliers
+      svg.select('.suppliers').selectAll('circle')
+        .each(function (d) {
+          const visible = isVisible(d);
+          if (visible) {
+            const proj = projection(d);
+            d3.select(this)
+              .attr('cx', proj[0]).attr('cy', proj[1])
+              .attr('display', null);
+          } else {
+            d3.select(this).attr('display', 'none');
+          }
+        });
+
+      // Animated traffic dots
+      const lanePaths = svg.select('.lanes').selectAll('path').nodes();
+      trafficDots.forEach((dot, i) => {
+        dot.t = (dot.t + dot.speed) % 1;
+        const lp = lanePaths[dot.laneIdx];
+        const dotEl = document.getElementById('traffic-' + i);
+        if (!lp || !dotEl) return;
+        try {
+          const len = lp.getTotalLength();
+          if (len > 0) {
+            const pt = lp.getPointAtLength(dot.t * len);
+            dotEl.setAttribute('cx', pt.x);
+            dotEl.setAttribute('cy', pt.y);
+            dotEl.setAttribute('display', null);
+          } else {
+            dotEl.setAttribute('display', 'none');
+          }
+        } catch (e) {
+          dotEl.setAttribute('display', 'none');
+        }
       });
     }
 
-    // ---- SMOOTH ANCHOR SCROLLING ----
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function(e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-          const offset = 80;
-          const top = target.getBoundingClientRect().top + window.pageYOffset - offset;
-          window.scrollTo({ top, behavior: 'smooth' });
-        }
-      });
-    });
-  </script>
+    let lon = 10;
+    function spin() {
+      lon += 0.06;
+      projection.rotate([lon, -15]);
+      render();
+      requestAnimationFrame(spin);
+    }
+
+    render();
+    spin();
+  })();
+</script>
 
 </body>
 </html>

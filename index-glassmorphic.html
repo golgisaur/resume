@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>MZ Resume</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23111'/><text x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-family='serif' font-size='14' font-weight='700' fill='white'>MZ</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --ink: #1a1a1a;
+      --muted: #575757;
+      --faint: #a0a0a0;
+      --rule: rgba(0,0,0,0.08);
+      --bg: #e8eaf0;
+      --glass: rgba(255,255,255,0.78);
+      --glass-border: rgba(255,255,255,0.9);
+      --shadow: 0 8px 40px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06);
+      --sidebar-w: 220px;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: 'Outfit', system-ui, sans-serif;
+      background: var(--bg);
+      background-image:
+        radial-gradient(ellipse 80% 60% at 15% 10%, rgba(210,218,255,0.55) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 85% 85%, rgba(220,210,255,0.35) 0%, transparent 60%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.4;
+      padding: 20px;
+      animation: pageFade 0.6s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    @keyframes pageFade {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    ::selection { background: var(--ink); color: #fff; }
+
+    /* ---- PAGE SHELL ---- */
+    .page {
+      width: 100%;
+      max-width: 960px;
+    }
+
+    /* ---- GLASS CARD ---- */
+    .card {
+      background: var(--glass);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 32px 36px 32px;
+      height: calc(100vh - 40px);
+      display: grid;
+      grid-template-columns: var(--sidebar-w) 1fr;
+      grid-template-rows: auto 1fr auto;
+      gap: 0;
+      overflow: hidden;
+    }
+
+    /* ---- TOP HEADER — full width ---- */
+    .header {
+      grid-column: 1 / -1;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(0,0,0,0.07);
+      margin-bottom: 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 24px;
+    }
+
+    .header-name {
+      font-size: 1.85rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      line-height: 1.1;
+      color: var(--ink);
+      margin-bottom: 3px;
+    }
+
+    .header-tagline {
+      font-size: 0.75rem;
+      font-weight: 400;
+      color: var(--muted);
+      letter-spacing: 0.3px;
+    }
+
+    .header-right {
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .contact-item {
+      display: block;
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-decoration: none;
+      line-height: 1.6;
+      transition: color 0.15s;
+    }
+
+    .contact-item:hover { color: var(--ink); }
+
+    /* ---- SIDEBAR ---- */
+    .sidebar {
+      padding-right: 28px;
+      border-right: 1px solid rgba(0,0,0,0.07);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* ---- MAIN ---- */
+    .main {
+      padding-left: 32px;
+    }
+
+    /* ---- SECTION LABEL ---- */
+    .section-label {
+      font-size: 0.6rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2.5px;
+      color: var(--faint);
+      margin-bottom: 10px;
+      padding-bottom: 7px;
+      border-bottom: 1px solid rgba(0,0,0,0.07);
+    }
+
+    /* ---- SIDEBAR BLOCK ---- */
+    .sidebar-block {
+      margin-bottom: 0;
+    }
+
+    /* ---- EDUCATION ---- */
+    .edu-school {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 1px;
+    }
+
+    .edu-year {
+      font-size: 0.68rem;
+      color: var(--faint);
+      margin-bottom: 4px;
+    }
+
+    .edu-degree {
+      font-size: 0.74rem;
+      font-weight: 400;
+      color: var(--ink);
+      line-height: 1.4;
+      margin-bottom: 5px;
+    }
+
+    .edu-coursework {
+      font-size: 0.69rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .edu-coursework strong {
+      color: var(--ink);
+      font-weight: 600;
+    }
+
+    /* ---- SKILLS ---- */
+    .skill-group {
+      margin-bottom: 9px;
+    }
+
+    .skill-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .skill-group-label {
+      font-size: 0.62rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--ink);
+      margin-bottom: 1px;
+    }
+
+    .skill-group-values {
+      font-size: 0.71rem;
+      font-weight: 400;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    /* ---- AVAILABILITY BAR ---- */
+    .availability-bar {
+      grid-column: 1 / -1;
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(0,0,0,0.07);
+      background: rgba(255,255,255,0.45);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 10px;
+      padding: 12px 18px;
+      border: 1.5px solid rgba(255,255,255,0.95);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .availability {
+      font-size: 0.75rem;
+      color: var(--ink);
+      line-height: 1.4;
+      font-style: italic;
+      text-align: center;
+    }
+
+    /* ---- EXPERIENCE ---- */
+    .role {
+      margin-bottom: 0;
+    }
+
+    .role-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 1px;
+    }
+
+    .role-title-block {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      flex-wrap: wrap;
+      min-width: 0;
+    }
+
+    .role-company {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .role-sep {
+      font-size: 0.75rem;
+      font-weight: 300;
+      color: var(--faint);
+    }
+
+    .role-title {
+      font-size: 0.8rem;
+      font-weight: 400;
+      color: var(--ink);
+    }
+
+    .role-dates {
+      font-size: 0.67rem;
+      color: var(--muted);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .role-location {
+      font-size: 0.66rem;
+      color: var(--faint);
+      margin-bottom: 6px;
+    }
+
+    .role-bullets {
+      list-style: none;
+      padding: 0;
+    }
+
+    .role-bullets li {
+      font-size: 0.74rem;
+      font-weight: 400;
+      color: #2d2d2d;
+      line-height: 1.42;
+      padding-left: 11px;
+      position: relative;
+      margin-bottom: 3px;
+    }
+
+    .role-bullets li:last-child { margin-bottom: 0; }
+
+    .role-bullets li::before {
+      content: '–';
+      position: absolute;
+      left: 0;
+      color: var(--faint);
+    }
+
+    /* ---- RULE between roles ---- */
+    .role-divider {
+      border: none;
+      border-top: 1px solid rgba(0,0,0,0.07);
+      margin: 13px 0;
+    }
+
+    /* ---- RESPONSIVE ---- */
+    @media (max-width: 680px) {
+      body {
+        padding: 12px;
+        align-items: flex-start;
+        overflow-y: auto;
+        height: auto;
+      }
+
+      html { overflow: auto; height: auto; }
+
+      .card {
+        grid-template-columns: 1fr;
+        height: auto;
+        padding: 28px 22px 32px;
+        border-radius: 14px;
+      }
+
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .header-right { text-align: left; }
+
+      .sidebar {
+        padding-right: 0;
+        border-right: none;
+        border-bottom: 1px solid rgba(0,0,0,0.07);
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+
+      .sidebar-block { flex: 1; min-width: 160px; }
+
+      .main { padding-left: 0; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+<div class="card">
+
+  <!-- HEADER — full width -->
+  <header class="header">
+    <div class="header-left">
+      <h1 class="header-name">Michael Zoghb</h1>
+      <p class="header-tagline">Supply Chain &middot; Operations &middot; Logistics</p>
+    </div>
+    <div class="header-right">
+      <a class="contact-item" href="mailto:michaelzoghb@gmail.com">michaelzoghb@gmail.com</a>
+      <a class="contact-item" href="tel:+16192544065">(619) 254-4065</a>
+      <a class="contact-item" href="https://www.linkedin.com/in/m--elie/" target="_blank" rel="noopener">linkedin.com/in/m--elie</a>
+    </div>
+  </header>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <div class="sidebar-block">
+      <div class="section-label">Education</div>
+      <div class="edu-school">Arizona State University</div>
+      <div class="edu-year">2017 &ndash; 2020</div>
+      <p class="edu-degree">BSc Supply Chain Management<br>W.P. Carey School of Business</p>
+      <p class="edu-coursework"><strong>Coursework:</strong> Global Supply Operations, Business Decision Models, Supply Management, Supply Chain Strategy, Research &amp; Negotiation</p>
+    </div>
+
+    <div class="sidebar-block">
+      <div class="section-label">Skills</div>
+
+      <div class="skill-group">
+        <div class="skill-group-label">Languages</div>
+        <div class="skill-group-values">English, Arabic, Greek</div>
+      </div>
+
+      <div class="skill-group">
+        <div class="skill-group-label">Technical</div>
+        <div class="skill-group-values">Excel, Power BI, Power Apps, G-Suite, Python, JavaScript, SQL</div>
+      </div>
+
+      <div class="skill-group">
+        <div class="skill-group-label">ERP Systems</div>
+        <div class="skill-group-values">MS Dynamics 365, Sage, SAP, CargoWise</div>
+      </div>
+
+      <div class="skill-group">
+        <div class="skill-group-label">Crypto</div>
+        <div class="skill-group-values">On-Chain Analysis, DeFi Protocols, DAO Governance, Multi-Chain (EVM, Cosmos, Solana)</div>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- MAIN — Experience -->
+  <main class="main">
+    <div class="section-label">Experience</div>
+
+    <div class="role">
+      <div class="role-header">
+        <div class="role-title-block">
+          <span class="role-company">AVI-SPL</span>
+          <span class="role-sep">/</span>
+          <span class="role-title">Global Supply Chain Analyst</span>
+        </div>
+        <span class="role-dates">2024 &ndash; Present</span>
+      </div>
+      <div class="role-location">Remote &mdash; San Francisco, CA</div>
+      <ul class="role-bullets">
+        <li>Delivered 10% annual cost savings via company-wide TCO analyses; all recommendations adopted by executive leadership.</li>
+        <li>Reduced procurement cycle times 20% and enhanced sourcing scalability across $150M in annual spend by standardizing workflows and aligning cross-functional teams.</li>
+        <li>Automated procurement, logistics, and invoicing with AI — boosting team productivity 30% at 100% accuracy.</li>
+        <li>Built dashboards to monitor logistics, procurement, warehousing, and inventory KPIs for proactive decision-making.</li>
+      </ul>
+    </div>
+
+    <hr class="role-divider">
+
+    <div class="role">
+      <div class="role-header">
+        <div class="role-title-block">
+          <span class="role-company">Bob&rsquo;s Red Mill</span>
+          <span class="role-sep">/</span>
+          <span class="role-title">Sourcing Specialist</span>
+        </div>
+        <span class="role-dates">2023 &ndash; 2024</span>
+      </div>
+      <div class="role-location">Milwaukie, Oregon</div>
+      <ul class="role-bullets">
+        <li>Led Source-to-Contract initiatives achieving $500K+ in annual savings across 100+ raw materials.</li>
+        <li>Aligned finance, accounting, and procurement teams on ERP processes; maintained 99% on-time delivery.</li>
+        <li>Cut procurement costs 12% through supplier pool expansion and data-driven contract negotiations.</li>
+        <li>Conducted quarterly supplier audits and performance reviews to validate capabilities and ensure compliance.</li>
+      </ul>
+    </div>
+
+    <hr class="role-divider">
+
+    <div class="role">
+      <div class="role-header">
+        <div class="role-title-block">
+          <span class="role-company">Mainfreight</span>
+          <span class="role-sep">/</span>
+          <span class="role-title">Air &amp; Ocean Operations</span>
+        </div>
+        <span class="role-dates">2021 &ndash; 2023</span>
+      </div>
+      <div class="role-location">Portland, Oregon</div>
+      <ul class="role-bullets">
+        <li>Managed 30+ client portfolio generating $40M annual revenue with 15% YoY growth.</li>
+        <li>Facilitated imports/exports across 20+ countries, improving efficiency 25% and cutting annual costs $300K.</li>
+        <li>Developed strategies during COVID-19 supply crunch — 30% faster delivery, 20% lower transport costs for 80% of shipments.</li>
+        <li>Negotiated carrier contracts improving the bottom line by $1.2M; maintained 100% trade compliance across 18 countries.</li>
+      </ul>
+    </div>
+
+  </main>
+
+  <!-- AVAILABILITY — full width footer row -->
+  <div class="availability-bar">
+    <p class="availability">Open to business development, operations, and product roles.</p>
+  </div>
+
+</div><!-- /.card -->
+</div><!-- /.page -->
+</body>
+</html>
